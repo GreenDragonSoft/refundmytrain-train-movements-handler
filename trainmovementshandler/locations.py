@@ -85,6 +85,10 @@ class Location(object):
     def crs_code(self):
         return self.three_alpha
 
+    @property
+    def is_public_station(self):
+        return self.three_alpha is not None  # TODO, this isn't actually true
+
     def __str__(self):
         return self.name
 
