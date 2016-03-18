@@ -29,8 +29,8 @@ def get_aws_queue(queue_url):
 
 
 def handle_queue(queue):
-    LOG.info(queue.attributes)
-    LOG.info('Waiting for messages...')
+    LOG.info("There are ~{} messages in the queue. Let's go!".format(
+        queue.attributes['ApproximateNumberOfMessages']))
 
     params = {
          'MaxNumberOfMessages': 10,
