@@ -29,8 +29,8 @@ def get_aws_queue(queue_url):
 
 
 def handle_queue(queue):
-    LOG.info(queue.attributes)
-    LOG.info('Waiting for messages...')
+    LOG.info("There are ~{} messages in the queue. Let's go!".format(
+        queue.attributes['ApproximateNumberOfMessages']))
 
     params = {
          'MaxNumberOfMessages': 10,
@@ -68,15 +68,19 @@ def process_message(raw_message):
 
     if (decoded.event_type == EventType.arrival and
             decoded.status == VariationStatus.late and
-            decoded.minutes_late >= 10 and
-            decoded.location.three_alpha is not None):
+            decoded.location.is_public_station and
+            decoded.operating_company and
+            decoded.operating_company.is_delay_repay_eligible(
+                decoded.minutes_late)):
 
-        LOG.info('{} {} arrival at {} ({})'.format(
-            decoded.actual_datetime,
-            decoded.early_late_description,
-            decoded.location.name,
-            decoded.location.three_alpha))
-        LOG.debug('Publishing message: {}'.format(decoded))
+        LOG.info('{} {} arrival at {} ({}) - eligible for '
+                 'compensation from {}'.format(
+                     decoded.actual_datetime,
+                     decoded.early_late_description,
+                     decoded.location.name,
+                     decoded.location.three_alpha,
+                     decoded.operating_company))
+
     else:
         LOG.debug('Dropping {} {} {} message'.format(
             decoded.status, decoded.event_type,
@@ -466,7 +470,10 @@ class TrainMovementsMessage(object):
 
     @staticmethod
     def _decode_stanox(stanox):
-        return locations.from_stanox(stanox)
+        try:
+            return locations.from_stanox(stanox)
+        except locations.LookupFailure:
+            LOG.error('Failed to look up STANOX {}.'.format(stanox))
 
     @staticmethod
     def _decode_operating_company(numeric_code):

@@ -11,7 +11,8 @@ TEN_MEGABYTES = 10 * 1024 * 1024
 HUNDRED_MEGABYTES = 100 * 1024 * 1024
 
 # set up formatting
-formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+formatter = logging.Formatter(
+    '[%(asctime)s] %(levelname)s %(name)s: %(message)s')
 
 # set up logging to STDOUT for all levels DEBUG and higher
 sh = logging.StreamHandler(sys.stdout)
@@ -30,8 +31,11 @@ fh2 = logging.handlers.RotatingFileHandler(
 fh2.setLevel(logging.WARN)
 fh2.setFormatter(formatter)
 
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
+
 # create Logger object
-LOG = logging.getLogger('LOG')
+LOG = logging.getLogger('')
 LOG.setLevel(logging.DEBUG)
 LOG.addHandler(sh)
 LOG.addHandler(fh)

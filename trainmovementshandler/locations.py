@@ -10,6 +10,10 @@ filename = pjoin(
 )
 
 
+class LookupError(KeyError):
+    pass
+
+
 class Location(object):
     """
     Reference data:
@@ -81,6 +85,10 @@ class Location(object):
     def crs_code(self):
         return self.three_alpha
 
+    @property
+    def is_public_station(self):
+        return self.three_alpha is not None  # TODO, this isn't actually true
+
     def __str__(self):
         return self.name
 
@@ -112,4 +120,7 @@ with open(filename, 'r') as f:
 
 
 def from_stanox(stanox):
-    return STANOX_LOOKUP[stanox]
+    try:
+        return STANOX_LOOKUP[stanox]
+    except KeyError:
+        raise LookupError('No location found for STANOX {}'.format(stanox))
