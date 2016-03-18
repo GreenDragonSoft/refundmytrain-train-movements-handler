@@ -28,7 +28,7 @@ class OperatingCompany(object):
         self.atoc_code = data['atoc_code']
 
     def __str__(self):
-        return self.name
+        return '{} ({})'.format(self.name, self.atoc_code)
 
     def __repr__(self):
         return 'OperatingCompany("{}")'.format(self.name)
