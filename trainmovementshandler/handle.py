@@ -82,9 +82,7 @@ def process_message(raw_message):
                      decoded.operating_company))
 
     else:
-        LOG.debug('Dropping {} {} {} message'.format(
-            decoded.status, decoded.event_type,
-            decoded.early_late_description))
+        LOG.debug('Dropping: {}'.format(str(decoded)))
 
     return True
 
