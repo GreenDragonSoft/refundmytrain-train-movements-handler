@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
 import json
+import logging
 
 from collections import OrderedDict
 from os.path import dirname, join as pjoin
 
-filename = pjoin(
+LOG = logging.getLogger(__name__)
+
+OPERATING_COMPANIES_FN = pjoin(
     dirname(__file__), 'uk-train-data', 'db', 'operating_companies.json'
+)
+
+DELAY_REPAY_FN = pjoin(
+    dirname(__file__), 'uk-train-data', 'db', 'delay_repay.json'
 )
 
 
@@ -41,12 +48,45 @@ class OperatingCompany(object):
             ('atoc_code', self.atoc_code),
         ])
 
+    @property
+    def delay_repay_policy(self):
+        return DELAY_REPAY.get(self.atoc_code, None)
 
-with open(filename, 'r') as f:
+    def is_delay_repay_eligible(self, late_minutes):
+        policy = self.delay_repay_policy
+
+        if policy is None:
+            LOG.warning('No delay repay policy for {}'.format(self))
+            return False
+        else:
+            return policy.is_eligible(late_minutes)
+
+
+class DelayRepayPolicy(object):
+    """
+    Calculates the amount of compensation due for a given lateness of a train.
+    """
+
+    def __init__(self, record):
+        self.minimum_eligible_minutes = record['minimum_minutes']
+
+    def is_eligible(self, late_minutes):
+        if self.minimum_eligible_minutes is None:
+            return False
+
+        return late_minutes >= self.minimum_eligible_minutes
+
+
+with open(OPERATING_COMPANIES_FN, 'r') as f:
     OPERATING_COMPANIES = [OperatingCompany(record) for record in json.load(f)]
     BUSINESS_CODE_LOOKUP = {oc.business_code: oc for oc in OPERATING_COMPANIES}
     NUMERIC_CODE_LOOKUP = {oc.numeric_code: oc for oc in OPERATING_COMPANIES}
     ATOC_CODE_LOOKUP = {oc.atoc_code: oc for oc in OPERATING_COMPANIES}
+
+
+with open(DELAY_REPAY_FN, 'r') as f:
+    DELAY_REPAY = {record['atoc_code']: DelayRepayPolicy(record)
+                   for record in json.load(f)}
 
 
 def from_business_code(business_code):
