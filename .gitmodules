@@ -1,0 +1,3 @@
+[submodule "trainmovementshandler/uk-train-data"]
+	path = trainmovementshandler/uk-train-data
+	url = https://github.com/greendragonsoft/uk-train-data
