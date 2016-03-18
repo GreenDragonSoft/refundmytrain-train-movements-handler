@@ -466,7 +466,10 @@ class TrainMovementsMessage(object):
 
     @staticmethod
     def _decode_stanox(stanox):
-        return locations.from_stanox(stanox)
+        try:
+            return locations.from_stanox(stanox)
+        except locations.LookupFailure:
+            LOG.error('Failed to look up STANOX {}.'.format(stanox))
 
     @staticmethod
     def _decode_operating_company(numeric_code):

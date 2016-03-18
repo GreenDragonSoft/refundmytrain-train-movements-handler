@@ -10,6 +10,10 @@ filename = pjoin(
 )
 
 
+class LookupError(KeyError):
+    pass
+
+
 class Location(object):
     """
     Reference data:
@@ -112,4 +116,7 @@ with open(filename, 'r') as f:
 
 
 def from_stanox(stanox):
-    return STANOX_LOOKUP[stanox]
+    try:
+        return STANOX_LOOKUP[stanox]
+    except KeyError:
+        raise LookupError('No location found for STANOX {}'.format(stanox))
