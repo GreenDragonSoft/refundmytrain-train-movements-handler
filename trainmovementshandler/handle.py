@@ -13,6 +13,8 @@ import operating_companies
 import locations
 from logger import LOG
 
+LOG_EVERY_N_MESSAGES = 10000
+
 
 def main():
     queue = get_aws_queue(os.environ['AWS_SQS_QUEUE_URL'])
@@ -49,7 +51,7 @@ def handle_queue(queue):
                 LOG.info("Not sending ACK for this one")
 
             count += 1
-            if count % 1000 == 0:
+            if count % LOG_EVERY_N_MESSAGES == 0:
                 LOG.info('Processed {} messages, ~{} messages in queue'.format(
                     count, queue.attributes['ApproximateNumberOfMessages']))
 
@@ -74,12 +76,13 @@ def process_message(raw_message):
                 decoded.minutes_late)):
 
         LOG.info('{} {} arrival at {} ({}) - eligible for '
-                 'compensation from {}'.format(
+                 'compensation from {}: {}'.format(
                      decoded.actual_datetime,
                      decoded.early_late_description,
                      decoded.location.name,
                      decoded.location.three_alpha,
-                     decoded.operating_company))
+                     decoded.operating_company,
+                     str(decoded)))
 
     else:
         LOG.debug('Dropping {} {} {} message'.format(
