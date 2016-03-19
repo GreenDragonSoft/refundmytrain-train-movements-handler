@@ -5,6 +5,7 @@ import sys
 __all__ = ['LOG']
 
 DEBUG_LOG_FILENAME = '/var/log/train-movements-handler/debug.log'
+INFO_LOG_FILENAME = '/var/log/train-movements-handler/info.log'
 WARNING_LOG_FILENAME = '/var/log/train-movements-handler/warning.log'
 
 TEN_MEGABYTES = 10 * 1024 * 1024
@@ -23,6 +24,12 @@ sh.setFormatter(formatter)
 fh = logging.handlers.RotatingFileHandler(
     DEBUG_LOG_FILENAME, maxBytes=TEN_MEGABYTES, backupCount=10)
 fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+
+# set up logging to a file for all levels DEBUG and higher
+fh = logging.handlers.RotatingFileHandler(
+    INFO_LOG_FILENAME, maxBytes=TEN_MEGABYTES, backupCount=10)
+fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 
 # set up logging to a file for all levels WARNING and higher
